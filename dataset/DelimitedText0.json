@@ -10,6 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"fileName": "Diabetes_prediction.csv",
 				"container": "dataser"
 			},
 			"columnDelimiter": ",",
