@@ -1,7 +1,0 @@
-{
-	"name": "AzureBlobStorage280",
-	"properties": {
-		"privateLinkResourceId": "/subscriptions/6ac86af2-9f7c-4d60-999e-89c8b0bf429e/resourceGroups/defaultgroup/providers/Microsoft.Storage/storageAccounts/mydatalakegen221",
-		"groupId": "blob"
-	}
-}
