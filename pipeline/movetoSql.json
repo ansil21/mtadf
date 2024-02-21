@@ -1,0 +1,171 @@
+{
+	"name": "movetoSql",
+	"properties": {
+		"description": "Moving data from blob to sql",
+		"activities": [
+			{
+				"name": "CopyData",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "Pregnancies",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "Pregnancies",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "Glucose",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "Glucose",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							},
+							{
+								"source": {
+									"name": "BloodPressure",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "BloodPressure",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							},
+							{
+								"source": {
+									"name": "SkinThickness",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "SkinThickness",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							},
+							{
+								"source": {
+									"name": "Insulin",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "Insulin",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							},
+							{
+								"source": {
+									"name": "BMI",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "BMI",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							},
+							{
+								"source": {
+									"name": "DiabetesPedigreeFunction",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "DiabetesPedigreeFunction",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							},
+							{
+								"source": {
+									"name": "Age",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "Age",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							},
+							{
+								"source": {
+									"name": "Diagnosis",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "Diagnosis",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
