@@ -10,6 +10,10 @@
 		"AzureBlobStorage1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"linktoDB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'linktoDB'"
 		}
 	},
 	"variables": {
@@ -28,6 +32,333 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/linktoDB')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('linktoDB_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "linktoDB",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Pregnancies",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Glucose",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "BloodPressure",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "SkinThickness",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Insulin",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "BMI",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "DiabetesPedigreeFunction",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Age",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Diagnosis",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "PatientData"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/linktoDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "Diabetes_prediction.csv",
+						"container": "dataser"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Pregnancies",
+						"type": "String"
+					},
+					{
+						"name": "Glucose",
+						"type": "String"
+					},
+					{
+						"name": "BloodPressure",
+						"type": "String"
+					},
+					{
+						"name": "SkinThickness",
+						"type": "String"
+					},
+					{
+						"name": "Insulin",
+						"type": "String"
+					},
+					{
+						"name": "BMI",
+						"type": "String"
+					},
+					{
+						"name": "DiabetesPedigreeFunction",
+						"type": "String"
+					},
+					{
+						"name": "Age",
+						"type": "String"
+					},
+					{
+						"name": "Diagnosis",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/movetoSql')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Moving data from blob to sql",
+				"activities": [
+					{
+						"name": "CopyData",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "Pregnancies",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Pregnancies",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Glucose",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Glucose",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "BloodPressure",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "BloodPressure",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "SkinThickness",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "SkinThickness",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "Insulin",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Insulin",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "BMI",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "BMI",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "DiabetesPedigreeFunction",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "DiabetesPedigreeFunction",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "Age",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Age",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "Diagnosis",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Diagnosis",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSqlTable1')]"
+			]
 		}
 	]
 }
